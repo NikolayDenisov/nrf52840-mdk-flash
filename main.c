@@ -1,55 +1,50 @@
-#include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
-#include "app_uart.h"
-#include "app_error.h"
+#include <stdbool.h>
+#include "nrf52840.h"
+#include "nrf52840_bitfields.h"
 #include "nrf_delay.h"
-#include "nrf.h"
-#include "bsp.h"
-#include "nrf_uart.h"
-#include "nrf_uarte.h"
 
+#define UART_TX_PIN 20
 
-#define UART_TX_BUF_SIZE 256      /**< UART TX buffer size. */
-#define UART_RX_BUF_SIZE 256      /**< UART RX buffer size. */
-
-void uart_error_handle(app_uart_evt_t *p_event)
+void uart_init(void)
 {
-    if (p_event->evt_type == APP_UART_COMMUNICATION_ERROR)
-    {
-        APP_ERROR_HANDLER(p_event->data.error_communication);
-    }
-    else if (p_event->evt_type == APP_UART_FIFO_ERROR)
-    {
-        APP_ERROR_HANDLER(p_event->data.error_code);
+    NRF_P0->PIN_CNF[UART_TX_PIN] = (1 << 0) | // Output direction
+                                   (1 << 1) | // Input buffer disconnected
+                                   (0 << 2) ; // Connect pull-up or pull-down resistors
+
+    NRF_UART0->PSEL.TXD = UART_TX_PIN;
+
+    NRF_UART0->PSEL.RTS = 0xFFFFFFFF;
+    NRF_UART0->PSEL.CTS = 0xFFFFFFFF;
+
+    NRF_UART0->BAUDRATE = UART_BAUDRATE_BAUDRATE_Baud115200;
+    NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled;
+    NRF_UART0->TASKS_STARTTX = 1;
+}
+
+void uart_send_char(char c)
+{
+    NRF_UART0->TXD = c;
+    while (NRF_UART0->EVENTS_TXDRDY == 0);
+    NRF_UART0->EVENTS_TXDRDY = 0;
+}
+
+void uart_send_string(const char* str) {
+    while (*str != '\0') {
+        uart_send_char(*str);
+        str++;
     }
 }
 
-#define UART_HWFC APP_UART_FLOW_CONTROL_ENABLED
 
 int main(void)
 {
+    uart_init();
+    const char s = 'S';
 
-    const app_uart_comm_params_t comm_params =
-        {
-            RX_PIN_NUMBER,
-            TX_PIN_NUMBER,
-            UART_PIN_DISCONNECTED,
-            UART_PIN_DISCONNECTED,
-            UART_HWFC,
-            true,
-            NRF_UARTE_BAUDRATE_115200};
-
-    APP_UART_FIFO_INIT(&comm_params,
-                       UART_RX_BUF_SIZE,
-                       UART_TX_BUF_SIZE,
-                       uart_error_handle,
-                       APP_IRQ_PRIORITY_LOWEST,
-                       err_code);
-    char s = 'S';
     while (true)
     {
-        app_uart_put(s);
+        uart_send_char(s);
         nrf_delay_ms(5000);
     }
 }

@@ -9,7 +9,8 @@
         "app_error.h": "c",
         "nrf_uart.h": "c",
         "nrf_uarte.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "stdint.h": "c"
     },
     "nrf-connect.topdir": "${nrf-connect.sdk:2.6.1}",
     "cortex-debug.variableUseNaturalFormat": true

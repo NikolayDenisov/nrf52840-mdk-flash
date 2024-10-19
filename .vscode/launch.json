@@ -5,7 +5,7 @@
             "name": "C++ Launch",
             "type": "cortex-debug",
             "request": "launch",
-            "executable": "${workspaceRoot}/_build/nrf52840_xxaa.out",
+            "executable": "${workspaceRoot}/armgcc/_build/nrf52840_xxaa.out",
             "cwd": "${workspaceRoot}",
             "preLaunchTask": "make",
             "servertype": "pyocd",
@@ -17,7 +17,7 @@
                 "--target",
                 "nrf52840",
                 "--elf",
-                "${workspaceRoot}/_build/nrf52840_xxaa.out",
+                "${workspaceRoot}/armgcc/_build/nrf52840_xxaa.out",
             ],
             "svdFile": "${workspaceFolder}/nrf52840.svd"
         }
