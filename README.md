@@ -1,11 +1,11 @@
-# nRF52840-MDK UART Example
+# nRF52840-MDK Flash Example
 
 ## Howto use
 
 1. Clone this repo
 
 ```bash
-git clone https://github.com/NikolayDenisov/nrf52840-mdk-uart.git
+git clone https://github.com/NikolayDenisov/nrf52840-mdk-flash.git
 ```
 
 2. Open Makefile in armgcc directory

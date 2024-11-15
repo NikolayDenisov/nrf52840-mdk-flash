@@ -1,4 +1,4 @@
-PROJECT_NAME     := uart_nrf52840_mdk
+PROJECT_NAME     := flash_nrf52840_mdk
 TARGETS          := nrf52840_xxaa
 OUTPUT_DIRECTORY := _build
 

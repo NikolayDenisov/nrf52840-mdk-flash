@@ -3,36 +3,57 @@
 #include "nrf52840.h"
 #include "nrf_delay.h"
 
-#define UART_TX_PIN 20
+#define FLASH_START_ADDR  0x3F000  // адрес страницы для записи (выберите подходящий под вашу задачу)
+#define FLASH_PAGE_SIZE   4096     // размер страницы флеш-памяти
 
-void uart_init(void)
-{
-    NRF_UART0->PSEL.TXD = UART_TX_PIN;
+// Пример IP-адреса в формате uint32_t (например, 192.168.1.1)
+uint32_t ip_address = 0xC0A80101;  // 0xC0 = 192, 0xA8 = 168, 0x01 = 1, 0x01 = 1
 
-    NRF_UART0->PSEL.RTS = 0xFFFFFFFF;
-    NRF_UART0->PSEL.CTS = 0xFFFFFFFF;
+void flash_write(uint32_t address, uint32_t value) {
+    // Разблокируем флеш-память для записи
+    NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen;  // WEN = Write enable
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy);  // Ждём, пока контроллер готов
 
-    NRF_UART0->BAUDRATE = 0x01D7E000;
-    NRF_UART0->ENABLE = 4;
-    NRF_UART0->TASKS_STARTTX = 1;
+    // Записываем значение
+    *(uint32_t*)address = value;
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy);  // Ждём завершения записи
+
+    // Блокируем запись
+    NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren;  // WEN = Read only
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
 }
 
-void uart_send_char(char c)
-{
-    NRF_UART0->TXD = c;
-    while (NRF_UART0->EVENTS_TXDRDY == 0);
-    NRF_UART0->EVENTS_TXDRDY = 0;
+void flash_page_erase(uint32_t address) {
+    // Разблокируем флеш-память для стирания
+    NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Een;  // WEN = Erase enable
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
+
+    // Стираем страницу
+    NRF_NVMC->ERASEPAGE = address;
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy);  // Ждём завершения стирания
+
+    // Блокируем запись
+    NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Ren;  // WEN = Read only
+    while (NRF_NVMC->READY == NVMC_READY_READY_Busy);
 }
 
+uint32_t flash_read(uint32_t address) {
+    // Чтение из флеш-памяти осуществляется напрямую
+    return *(uint32_t*)address;
+}
 
-int main(void)
-{
-    uart_init();
-    const char s = 'S';
+int main(void) {
+    // Стираем страницу перед записью
+    // flash_page_erase(FLASH_START_ADDR);
 
-    while (true)
-    {
-        uart_send_char(s);
-        nrf_delay_ms(5000);
+    // Записываем IP-адрес в первую ячейку страницы
+    // flash_write(FLASH_START_ADDR, ip_address);
+
+    while (true) {
+        nrf_delay_us(5000);
+        uint32_t read_ip_address = flash_read(FLASH_START_ADDR);
+        if (read_ip_address == ip_address) {
+            __NOP();
+        }
     }
 }
