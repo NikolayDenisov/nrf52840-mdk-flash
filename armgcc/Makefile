@@ -7,7 +7,7 @@ SDK_ROOT := /Users/nick/projects/iot/nRF5_SDK_17.1.0_ddde560/
 PROJ_DIR := ..
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
-  LINKER_SCRIPT  := uart_gcc_nrf52.ld
+  LINKER_SCRIPT  := flash_gcc_nrf52.ld
 
 # Source files common to all targets
 SRC_FILES += \
