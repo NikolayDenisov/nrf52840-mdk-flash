@@ -13,7 +13,9 @@
         "stdint.h": "c",
         "nrf_drv_uart.h": "c",
         "cstdio": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "nrf52805_bitfields.h": "c",
+        "stdbool.h": "c"
     },
     "nrf-connect.topdir": "${nrf-connect.sdk:2.6.1}",
     "cortex-debug.variableUseNaturalFormat": true
